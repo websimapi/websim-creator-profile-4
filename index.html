@@ -388,30 +388,21 @@
             try {
                 document.getElementById('activity-loading').style.display = 'block';
                 
-                // Get creator's projects
-                const projectsResponse = await fetch(`/api/v1/users/${currentCreator.username}/projects?first=20&posted=true`);
+                // Get creator's recent public projects
+                const projectsResponse = await fetch(`/api/v1/users/${currentCreator.username}/projects?first=20&posted=true&sort_by=updated_at`);
                 const projectsData = await projectsResponse.json();
                 
-                // Get comments from all projects
-                const commentPromises = projectsData.projects.data.slice(0, 10).map(async (item) => {
-                    try {
-                        const commentsResponse = await fetch(`/api/v1/projects/${item.project.id}/comments?first=10`);
-                        const commentsData = await commentsResponse.json();
-                        return commentsData.comments.data.map(commentItem => ({
-                            ...commentItem.comment,
-                            projectTitle: item.project.title,
-                            projectId: item.project.id
-                        }));
-                    } catch (error) {
-                        console.error('Error fetching comments for project:', item.project.id, error);
-                        return [];
-                    }
-                });
-                
-                const allProjectComments = await Promise.all(commentPromises);
-                allComments = allProjectComments.flat()
-                    .filter(comment => comment.author && comment.author.username === currentCreator.username)
-                    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                // Use the projects directly instead of comments
+                allComments = projectsData.projects.data
+                    .filter(item => item.project.posted && item.project.visibility === 'public')
+                    .map(item => ({
+                        id: item.project.id,
+                        projectTitle: item.project.title,
+                        projectId: item.project.id,
+                        created_at: item.project.updated_at,
+                        description: item.project.description || 'No description available',
+                        author: currentCreator
+                    }))
                     .slice(0, 50); // Limit to 50 most recent
                 
                 document.getElementById('activity-loading').style.display = 'none';
@@ -430,7 +421,7 @@
             commentsList.className = 'single-comment-display';
             
             if (allComments.length === 0) {
-                commentsList.innerHTML = '<div class="no-comments">No recent comments found</div>';
+                commentsList.innerHTML = '<div class="no-comments">No recent projects found</div>';
                 return;
             }
             
@@ -499,11 +490,11 @@
             
             const commentText = document.createElement('div');
             commentText.className = 'comment-text';
-            commentText.textContent = comment.raw_content || 'Comment content not available';
+            commentText.textContent = comment.description || 'No description available';
             
             const commentDate = document.createElement('div');
             commentDate.className = 'comment-date';
-            commentDate.textContent = new Date(comment.created_at).toLocaleDateString();
+            commentDate.textContent = 'Updated: ' + new Date(comment.created_at).toLocaleDateString();
             
             div.appendChild(projectLink);
             div.appendChild(commentText);
