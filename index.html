@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Profile</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a23;
+            color: #00ff41;
+            font-family: 'Courier Prime', monospace;
+            min-height: 100vh;
+            display: block;
+            background-image: 
+                radial-gradient(circle at 20% 50%, #1a1a3a 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, #2a2a4a 0%, transparent 50%),
+                linear-gradient(45deg, #0a0a23 25%, transparent 25%),
+                linear-gradient(-45deg, #0a0a23 25%, transparent 25%);
+            background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+            animation: retro-bg 10s ease-in-out infinite alternate;
+        }
+        
+        @keyframes retro-bg {
+            0% { background-position: 0% 0%, 100% 100%, 0 0, 0 0; }
+            100% { background-position: 100% 100%, 0% 0%, 20px 20px, -20px -20px; }
+        }
+        
+        .terminal {
+            background: rgba(10, 10, 35, 0.95);
+            border: 3px solid #00ff41;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 
+                0 0 20px #00ff41,
+                inset 0 0 20px rgba(0, 255, 65, 0.1);
+            position: relative;
+            overflow: hidden;
+            flex: 0 0 400px;
+        }
+        
+        .terminal::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 65, 0.03) 2px,
+                rgba(0, 255, 65, 0.03) 4px
+            );
+            pointer-events: none;
+        }
+        
+        .ascii-border {
+            color: #1e3a8a;
+            font-size: 12px;
+            line-height: 1;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .profile-container {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid #1e3a8a;
+            margin: 0 auto 20px;
+            display: block;
+            box-shadow: 
+                0 0 15px #1e3a8a,
+                inset 0 0 15px rgba(30, 58, 138, 0.3);
+            image-rendering: pixelated;
+            filter: contrast(1.2) brightness(1.1);
+        }
+        
+        .username {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00ff41;
+            text-shadow: 
+                0 0 10px #00ff41,
+                2px 2px 0 #1e3a8a;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00ff41, 2px 2px 0 #1e3a8a; }
+            to { text-shadow: 0 0 20px #00ff41, 0 0 30px #00ff41, 2px 2px 0 #1e3a8a; }
+        }
+        
+        .sonauto-button {
+            background: #de1d48;
+            border: 2px solid black;
+            border-radius: 10px;
+            padding: 10px;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-weight: bold; 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .sonauto-icon {
+            width: 48px;
+            height: 48px;
+            image-rendering: pixelated;
+        }
+        
+        .loading {
+            color: #1e3a8a;
+            font-size: 1.1em;
+        }
+        
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+        
+        .construction-text {
+            color: #00ff41;
+            font-size: 1em;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .construction-text s {
+            color: #ff4100; 
+            text-decoration-color: #ff4100; 
+        }
+        
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+            padding: 20px;
+            gap: 20px;
+            align-items: flex-start;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .activity-sidebar {
+            flex: 1;
+            max-width: 500px;
+            min-width: 300px;
+        }
+        
+        .sidebar-terminal {
+            background: rgba(10, 10, 35, 0.95);
+            border: 2px solid #1e3a8a;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 
+                0 0 15px #1e3a8a,
+                inset 0 0 15px rgba(30, 58, 138, 0.1);
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-terminal::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 2px,
+                rgba(30, 58, 138, 0.03) 2px,
+                rgba(30, 58, 138, 0.03) 4px
+            );
+            pointer-events: none;
+        }
+        
+        .comment-item {
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid #1e3a8a;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .comment-project {
+            color: #00ff41;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            text-decoration: none;
+        }
+        
+        .comment-project:hover {
+            text-shadow: 0 0 5px #00ff41;
+        }
+        
+        .comment-text {
+            color: #cccccc;
+            font-size: 0.85em;
+            line-height: 1.4;
+            margin-bottom: 5px;
+        }
+        
+        .comment-date {
+            color: #1e3a8a;
+            font-size: 0.75em;
+        }
+        
+        .no-comments {
+            color: #1e3a8a;
+            text-align: center;
+            font-style: italic;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                padding: 10px;
+            }
+            
+            .terminal {
+                flex: none;
+                width: 100%;
+            }
+            
+            .activity-sidebar {
+                width: 100%;
+                max-width: none;
+            }
+            
+            .username {
+                font-size: 2em;
+            }
+            
+            .sonauto-button {
+                padding: 12px 20px; 
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="terminal">
+            <div class="ascii-border">
+                ╔══════════════════════════════════════════════════════════════╗
+            </div>
+            
+            <div class="profile-container">
+                <div id="loading" class="loading">Loading creator profile</div>
+                <div id="profile-content" style="display: none;">
+                    <img id="profile-image" src="" alt="Profile" class="profile-image">
+                    <h1 id="username" class="username"></h1>
+                    
+                    <a href="https://sonauto.ai/artist/api" target="_blank" class="sonauto-button">
+                        <img src="/sonauto.png" alt="Sonauto" class="sonauto-icon">
+                    </a>
+                    <p class="construction-text">This Page Is <s>Always</s> Somewhat Under Construction</p>
+                </div>
+            </div>
+            
+            <div class="ascii-border">
+                ╚══════════════════════════════════════════════════════════════╝
+            </div>
+        </div>
+        
+        <div class="activity-sidebar">
+            <div class="sidebar-terminal">
+                <div class="ascii-border">
+                    ╔════════ RECENT ACTIVITY ════════╗
+                </div>
+                <div id="activity-loading" class="loading">Loading activity</div>
+                <div id="activity-content" style="display: none;">
+                    <div id="comments-list"></div>
+                </div>
+                <div class="ascii-border">
+                    ╚═════════════════════════════════╝
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCreator = null;
+        let isLoadingComments = false;
+        let allComments = [];
+        let displayedComments = 0;
+        const commentsPerLoad = 5;
+
+        async function loadCreatorProfile() {
+            try {
+                const creator = await window.websim.getCreator();
+                currentCreator = creator;
+                
+                if (creator) {
+                    const profileImage = document.getElementById('profile-image');
+                    const username = document.getElementById('username');
+                    
+                    profileImage.src = `https://images.websim.com/avatar/${creator.username}`;
+                    profileImage.alt = `${creator.username}'s avatar`;
+                    
+                    username.textContent = `@${creator.username}`;
+                    
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('profile-content').style.display = 'block';
+                } else {
+                    document.getElementById('loading').textContent = 'Creator profile not found';
+                }
+            } catch (error) {
+                console.error('Error loading creator profile:', error);
+                document.getElementById('loading').textContent = 'Error loading profile';
+            }
+        }
+        
+        async function loadCreatorActivity() {
+            if (!currentCreator) return;
+            
+            try {
+                document.getElementById('activity-loading').style.display = 'block';
+                
+                // Get creator's projects
+                const projectsResponse = await fetch(`/api/v1/users/${currentCreator.username}/projects?first=20&posted=true`);
+                const projectsData = await projectsResponse.json();
+                
+                // Get comments from all projects
+                const commentPromises = projectsData.projects.data.slice(0, 10).map(async (item) => {
+                    try {
+                        const commentsResponse = await fetch(`/api/v1/projects/${item.project.id}/comments?first=10`);
+                        const commentsData = await commentsResponse.json();
+                        return commentsData.comments.data.map(commentItem => ({
+                            ...commentItem.comment,
+                            projectTitle: item.project.title,
+                            projectId: item.project.id
+                        }));
+                    } catch (error) {
+                        console.error('Error fetching comments for project:', item.project.id, error);
+                        return [];
+                    }
+                });
+                
+                const allProjectComments = await Promise.all(commentPromises);
+                allComments = allProjectComments.flat()
+                    .filter(comment => comment.author && comment.author.username === currentCreator.username)
+                    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                    .slice(0, 50); // Limit to 50 most recent
+                
+                document.getElementById('activity-loading').style.display = 'none';
+                document.getElementById('activity-content').style.display = 'block';
+                
+                displayMoreComments();
+                
+            } catch (error) {
+                console.error('Error loading creator activity:', error);
+                document.getElementById('activity-loading').textContent = 'Error loading activity';
+            }
+        }
+        
+        function displayMoreComments() {
+            if (isLoadingComments) return;
+            
+            const commentsList = document.getElementById('comments-list');
+            const start = displayedComments;
+            const end = Math.min(start + commentsPerLoad, allComments.length);
+            
+            if (start >= allComments.length) {
+                if (displayedComments === 0) {
+                    commentsList.innerHTML = '<div class="no-comments">No recent comments found</div>';
+                }
+                return;
+            }
+            
+            for (let i = start; i < end; i++) {
+                const comment = allComments[i];
+                const commentElement = createCommentElement(comment);
+                commentsList.appendChild(commentElement);
+            }
+            
+            displayedComments = end;
+        }
+        
+        function createCommentElement(comment) {
+            const div = document.createElement('div');
+            div.className = 'comment-item';
+            
+            const projectLink = document.createElement('a');
+            projectLink.href = `https://websim.com/p/${comment.projectId}`;
+            projectLink.className = 'comment-project';
+            projectLink.textContent = `→ ${comment.projectTitle || 'Project'}`;
+            projectLink.target = '_blank';
+            
+            const commentText = document.createElement('div');
+            commentText.className = 'comment-text';
+            commentText.textContent = comment.raw_content || 'Comment content not available';
+            
+            const commentDate = document.createElement('div');
+            commentDate.className = 'comment-date';
+            commentDate.textContent = new Date(comment.created_at).toLocaleDateString();
+            
+            div.appendChild(projectLink);
+            div.appendChild(commentText);
+            div.appendChild(commentDate);
+            
+            return div;
+        }
+        
+        // Infinite scroll
+        function setupInfiniteScroll() {
+            const sidebar = document.querySelector('.sidebar-terminal');
+            if (!sidebar) return;
+            
+            sidebar.addEventListener('scroll', () => {
+                if (sidebar.scrollTop + sidebar.clientHeight >= sidebar.scrollHeight - 10) {
+                    displayMoreComments();
+                }
+            });
+        }
+        
+        async function initProfile() {
+            await loadCreatorProfile();
+            if (currentCreator) {
+                await loadCreatorActivity();
+                setupInfiniteScroll();
+            }
+        }
+        
+        window.addEventListener('load', initProfile);
+    </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
