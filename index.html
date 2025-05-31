@@ -213,6 +213,42 @@
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+        
+        .comment-item.glitching {
+            animation: glitch 0.8s ease-in-out;
+        }
+        
+        .comment-item.fading {
+            opacity: 0;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translateX(0); }
+            10% { transform: translateX(-2px) skew(-1deg); color: #ff00ff; }
+            20% { transform: translateX(2px) skew(1deg); color: #00ffff; }
+            30% { transform: translateX(-1px) skew(-0.5deg); color: #ff0000; }
+            40% { transform: translateX(1px) skew(0.5deg); color: #00ff00; }
+            50% { transform: translateX(-0.5px); filter: hue-rotate(90deg); }
+            60% { transform: translateX(0.5px); filter: hue-rotate(180deg); }
+            70% { transform: translateX(-0.2px); filter: hue-rotate(270deg); }
+            80% { transform: translateX(0.2px); color: #ffff00; }
+            90% { transform: translateX(0); filter: none; color: inherit; }
+            100% { transform: translateX(0); }
+        }
+        
+        .single-comment-display {
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .single-comment-display .comment-item {
+            margin-bottom: 0;
+            width: 100%;
         }
         
         .comment-project {
@@ -317,8 +353,9 @@
         let currentCreator = null;
         let isLoadingComments = false;
         let allComments = [];
-        let displayedComments = 0;
-        const commentsPerLoad = 5;
+        let currentCommentIndex = 0;
+        let glitchInterval;
+        let usedCommentIndices = new Set();
 
         async function loadCreatorProfile() {
             try {
@@ -380,7 +417,7 @@
                 document.getElementById('activity-loading').style.display = 'none';
                 document.getElementById('activity-content').style.display = 'block';
                 
-                displayMoreComments();
+                startGlitchingComments();
                 
             } catch (error) {
                 console.error('Error loading creator activity:', error);
@@ -388,27 +425,66 @@
             }
         }
         
-        function displayMoreComments() {
-            if (isLoadingComments) return;
-            
+        function startGlitchingComments() {
             const commentsList = document.getElementById('comments-list');
-            const start = displayedComments;
-            const end = Math.min(start + commentsPerLoad, allComments.length);
+            commentsList.className = 'single-comment-display';
             
-            if (start >= allComments.length) {
-                if (displayedComments === 0) {
-                    commentsList.innerHTML = '<div class="no-comments">No recent comments found</div>';
-                }
+            if (allComments.length === 0) {
+                commentsList.innerHTML = '<div class="no-comments">No recent comments found</div>';
                 return;
             }
             
-            for (let i = start; i < end; i++) {
-                const comment = allComments[i];
-                const commentElement = createCommentElement(comment);
-                commentsList.appendChild(commentElement);
+            displayNextComment();
+            glitchInterval = setInterval(() => {
+                glitchAndChangeComment();
+            }, 4000); // Change comment every 4 seconds
+        }
+        
+        function getNextCommentIndex() {
+            if (usedCommentIndices.size >= allComments.length) {
+                // Reset if we've used all comments
+                usedCommentIndices.clear();
             }
             
-            displayedComments = end;
+            let nextIndex;
+            do {
+                nextIndex = Math.floor(Math.random() * allComments.length);
+            } while (usedCommentIndices.has(nextIndex) && usedCommentIndices.size < allComments.length);
+            
+            usedCommentIndices.add(nextIndex);
+            return nextIndex;
+        }
+        
+        function displayNextComment() {
+            const commentsList = document.getElementById('comments-list');
+            currentCommentIndex = getNextCommentIndex();
+            const comment = allComments[currentCommentIndex];
+            
+            if (comment) {
+                const commentElement = createCommentElement(comment);
+                commentsList.innerHTML = '';
+                commentsList.appendChild(commentElement);
+            }
+        }
+        
+        function glitchAndChangeComment() {
+            const commentsList = document.getElementById('comments-list');
+            const currentComment = commentsList.querySelector('.comment-item');
+            
+            if (currentComment) {
+                // Start glitch effect
+                currentComment.classList.add('glitching');
+                
+                setTimeout(() => {
+                    // Start fade out
+                    currentComment.classList.add('fading');
+                    
+                    setTimeout(() => {
+                        // Display next comment
+                        displayNextComment();
+                    }, 500); // Wait for fade out
+                }, 800); // Wait for glitch animation
+            }
         }
         
         function createCommentElement(comment) {
@@ -436,23 +512,10 @@
             return div;
         }
         
-        // Infinite scroll
-        function setupInfiniteScroll() {
-            const sidebar = document.querySelector('.sidebar-terminal');
-            if (!sidebar) return;
-            
-            sidebar.addEventListener('scroll', () => {
-                if (sidebar.scrollTop + sidebar.clientHeight >= sidebar.scrollHeight - 10) {
-                    displayMoreComments();
-                }
-            });
-        }
-        
         async function initProfile() {
             await loadCreatorProfile();
             if (currentCreator) {
                 await loadCreatorActivity();
-                setupInfiniteScroll();
             }
         }
         
